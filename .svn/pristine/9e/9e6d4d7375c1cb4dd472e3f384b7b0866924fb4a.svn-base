@@ -1,0 +1,129 @@
+package actions;
+
+public class MyActionManager {
+
+	private CallAboutDialog callAboutDialog = new CallAboutDialog();
+	private CascadeWindowAction cascadeWindowAction = new CascadeWindowAction();
+	private CopyAction copyAction = new CopyAction();
+	private CutAction cutAction = new CutAction();
+	private DeleteAction deleteAction = new DeleteAction();
+	private EnglishAction englishAction = new EnglishAction();
+	private ExitAction exitAction = new ExitAction();
+	private HorizontalWindowAction horizontalWindowAction = new HorizontalWindowAction();
+	private MySelectAction selectAction = new MySelectAction();
+	private NewCircleAction newCircleAction = new NewCircleAction();
+	private NewDocumentAction newDocumentAction = new NewDocumentAction();
+	private NewPageAction newPageAction = new NewPageAction();
+	private NewProjectAction newProjectAction = new NewProjectAction();
+	private NewRectangleAction newRectangleAction = new NewRectangleAction();
+	private NewSlotAction newTSlotAction = new NewSlotAction('T');
+	private NewSlotAction newGSlotAction = new NewSlotAction('G');
+	private OpenProjectAction openProjectAction = new OpenProjectAction();
+	private OpenProjectFileAction openProjectFileAction = new OpenProjectFileAction();
+	private PasteAction pasteAction = new PasteAction();
+	private RedoAction redoAction = new RedoAction();
+	private SaveProjectFileAction saveProjectFileAction = new SaveProjectFileAction();
+	private SerbianLAction serbianLAction = new SerbianLAction();
+	private UndoAction undoAction = new UndoAction();
+	private VerticalWindowAction verticalWindowAction = new VerticalWindowAction();
+	
+	public MyActionManager() {
+		super();
+	}
+
+	public MySelectAction getSelectAction() {
+		return selectAction;
+	}
+
+	public CopyAction getCopyAction() {
+		return copyAction;
+	}
+
+	public CutAction getCutAction() {
+		return cutAction;
+	}
+
+	public PasteAction getPasteAction() {
+		return pasteAction;
+	}
+
+	public CallAboutDialog getCallAboutDialog() {
+		return callAboutDialog;
+	}
+	
+	public CascadeWindowAction getCascadeWindowAction() {
+		return cascadeWindowAction;
+	}
+	
+	public DeleteAction getDeleteAction() {
+		return deleteAction;
+	}
+	
+	public EnglishAction getEnglishAction() {
+		return englishAction;
+	}
+	
+	public ExitAction getExitAction() {
+		return exitAction;
+	}
+	
+	public HorizontalWindowAction getHorizontalWindowAction() {
+		return horizontalWindowAction;
+	}
+	
+	public NewCircleAction getNewCircleAction() {
+		return newCircleAction;
+	}
+	
+	public NewDocumentAction getNewDocumentAction() {
+		return newDocumentAction;
+	}
+	
+	public NewPageAction getNewPageAction() {
+		return newPageAction;
+	}
+	
+	public NewProjectAction getNewProjectAction() {
+		return newProjectAction;
+	}
+	
+	public NewRectangleAction getNewRectangleAction() {
+		return newRectangleAction;
+	}
+	
+	public NewSlotAction getNewTSlotAction() {
+		return newTSlotAction;
+	}
+	
+	public NewSlotAction getNewGSlotAction() {
+		return newGSlotAction;
+	}
+	
+	public OpenProjectAction getOpenProjectAction() {
+		return openProjectAction;
+	}
+	
+	public OpenProjectFileAction getOpenProjectFileAction() {
+		return openProjectFileAction;
+	}
+	
+	public RedoAction getRedoAction() {
+		return redoAction;
+	}
+	
+	public SaveProjectFileAction getSaveProjectFileAction() {
+		return saveProjectFileAction;
+	}
+	
+	public SerbianLAction getSerbianLAction() {
+		return serbianLAction;
+	}
+	
+	public UndoAction getUndoAction() {
+		return undoAction;
+	}
+	
+	public VerticalWindowAction getVerticalWindowAction() {
+		return verticalWindowAction;
+	}
+}

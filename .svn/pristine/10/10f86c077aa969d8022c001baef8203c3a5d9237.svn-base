@@ -1,0 +1,135 @@
+package model;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app_main.MyMainFrame;
+
+public class MyProject extends DefaultMutableTreeNode implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	private ArrayList<MyDocument> documents;
+	private ArrayList<Integer> free_indexes;
+	private String name;
+	private transient boolean changed;
+	private transient boolean _open;
+	private MyObservable observable;
+	private File projectFile;
+	private int ID;
+	
+	public MyProject(String name) {
+		super(name);
+		this.name = name;
+		this.observable = new MyObservable();
+		this.documents = new ArrayList<MyDocument>();
+		this.free_indexes = new ArrayList<Integer>();
+		this.projectFile = null;
+	}
+	
+	public void addDocument(MyDocument doc) {
+		doc.setParent_proj(this);
+		doc.setID(MyMainFrame.getInstance().getActionManager().getNewProjectAction().gen_idx(free_indexes, documents));
+		doc.setName("Doc-" + Integer.toString(doc.getID()));
+		
+		this.documents.add(doc);
+		this.add((DefaultMutableTreeNode) doc);
+		
+		this.changed = true;
+		
+		ObservableInfo observableInfo = new ObservableInfo(doc, 1);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+	}
+	
+	public void removeDocument(MyDocument doc) {
+		for(int i = 0; i < doc.getPageCount(); i++) {
+			doc.removePage(doc.getPage(i));
+		}
+		
+		Integer tmp = Integer.valueOf(doc.getID());
+		
+		this.documents.remove(doc);
+		this.remove(doc);
+		this.free_indexes.add(tmp);
+		
+		this.changed = true;
+		
+		ObservableInfo observableInfo = new ObservableInfo(doc, 2);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+	}
+	
+	public MyDocument getDocument(int index) {
+		return this.documents.get(index);
+	}
+	
+	public int getDocumentIndex(MyDocument doc) {
+		return this.documents.indexOf(doc);
+	}
+	
+	public int getDocumentCount() {
+		return this.documents.size();
+	}
+
+	@Override
+	public String toString() {
+		return ((changed ? "*" : "") + this.name);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public MyObservable getObservable() {
+		return observable;
+	}
+
+	public void setObservable(MyObservable observable) {
+		this.observable = observable;
+	}
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+	
+	public boolean is_open() {
+		return _open;
+	}
+
+	public void set_open(boolean _open) {
+		this._open = _open;
+	}
+
+	public boolean isChanged() {
+		return changed;
+	}
+
+	public void setChanged(boolean changed) {
+		if (this.changed != changed){
+		     this.changed = changed;
+		     //SwingUtilities.updateComponentTreeUI(MyMainFrame.getInstance().getWorkspaceTree());
+		}
+	}
+	
+	public File getProjectFile() {
+		return projectFile;
+	}
+
+	public void setProjectFile(File projectFile) {
+		this.projectFile = projectFile;
+	}
+}

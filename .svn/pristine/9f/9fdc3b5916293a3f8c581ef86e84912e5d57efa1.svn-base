@@ -1,0 +1,44 @@
+package model;
+
+import java.io.Serializable;
+
+public class MyDocShare implements Serializable {
+	private static final long serialVersionUID = 1L;
+	private MyProject proj;
+	private MyDocument doc;
+	
+	public boolean eq2( MyDocShare mds ){
+		if( this == null || mds == null ) return false;
+		else return this.proj.getName() == mds.proj.getName() 
+			&& this.doc.getName() == mds.doc.getName();
+	}
+	
+	public MyDocShare(){
+		this.proj = null;
+		this.doc = null;
+	}
+	public MyDocShare( MyProject proj, MyDocument doc ){
+		this.proj = proj;
+		this.doc = doc;
+	}
+	public MyDocShare(MyDocShare original_doc) {
+		this.proj = new MyProject( original_doc.proj );
+		this.doc = new MyDocument( original_doc.doc );
+	}
+
+	public void setProj( MyProject proj ){
+		this.proj = proj;
+	}
+	public void setDoc( MyDocument doc ){
+		this.doc = doc;
+	}
+	public MyProject getProj(){
+		return this.proj;
+	}
+	public MyDocument getDoc(){
+		return this.doc;
+	}
+	@Override public String toString(){
+		return this.proj.getName()+" - "+this.doc.getName();
+	}
+}

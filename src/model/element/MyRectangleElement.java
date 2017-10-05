@@ -1,0 +1,66 @@
+package model.element;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.awt.geom.Point2D;
+
+import model.MyElement;
+import model.MySlot;
+import app_main.MyMainFrame;
+import view.painter.MyRectanglePainter;
+
+public class MyRectangleElement extends MySlotElement {
+	private static final long serialVersionUID = 1L;
+
+	public MyRectangleElement(Point2D position, Dimension size, Stroke stroke, Paint paint, Color strokeColor) {
+		super(position, size, stroke, paint, strokeColor);
+		elementPainter = new MyRectanglePainter(this);
+		MySlot seld_slot = MyMainFrame.getInstance().getWorkspaceTree().getCurrentSlot();
+		if(seld_slot != null){
+			if(seld_slot.getParent_page().getParent_doc().getOriginal() != null){
+				seld_slot = seld_slot.getParent_page().getParent_doc()
+				.getOriginal().getDoc().getPage(seld_slot.getParent_page().toString())
+				.getSlot(seld_slot.toString());
+			}
+			MyElement elem = new MyElement(" ");
+			elem.setType("Rectangle");
+			elem = seld_slot.addElement(elem);
+			this.setName(" ");
+			this.relevant_element_ID = elem.getID();
+		}
+	}
+	
+	public MyRectangleElement(MyRectangleElement rectangle) {
+		super(rectangle);
+		elementPainter = new MyRectanglePainter(rectangle);
+		MySlot seld_slot = MyMainFrame.getInstance().getWorkspaceTree().getCurrentSlot();
+		MyElement elem = new MyElement(" ");
+		elem.setType("Rectangle");
+		elem = seld_slot.addElement(elem);
+		this.setName(" ");
+		this.relevant_element_ID = elem.getID();
+	}
+	
+	public static MySlotElement createDefault(Point2D pos, int elemNo) {
+		Point2D position = (Point2D) pos.clone();
+		Paint[] fill = {Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED, Color.ORANGE};
+		Color[] strokeC = {Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED, Color.ORANGE};
+		
+		MyRectangleElement rectangleElement = new MyRectangleElement(
+			position, new Dimension(40, 40), 
+			new BasicStroke(2f), 
+			fill[i_r], strokeC[i_r]
+		);
+		
+		if(i_r < 5) i_r++; else i_r = 0;
+		return rectangleElement;
+	}
+
+	@Override
+	public MySlotElement clone() {
+		return new MyRectangleElement(this);
+	}
+}

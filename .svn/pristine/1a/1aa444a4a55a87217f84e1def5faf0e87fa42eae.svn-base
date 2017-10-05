@@ -1,0 +1,191 @@
+package app_main;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.Transferable;
+import java.nio.channels.SelectableChannel;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import javax.swing.AbstractAction;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
+
+import actions.MyActionManager;
+import gui.MyMenu;
+import gui.MyStatusBar;
+import gui.MyToolbar;
+import gui.MyWorkspaceTree;
+import model.MyProject;
+import model.MyWorkspace;
+import view.MyWorkspaceView;
+
+public class MyMainFrame extends JFrame implements ClipboardOwner {
+	private static final long serialVersionUID = 1L;
+	
+	private static MyMainFrame instance = null;
+	private MyActionManager actionManager;
+	private MyMenu menu;
+	private MyToolbar toolbar;
+	private MyStatusBar statusBar;
+	private MyWorkspaceTree workspaceTree;
+	private MyWorkspace workspace;
+	private MyWorkspaceView desktop;
+	
+	private ResourceBundle resourceBundle;
+	
+	private Clipboard clipboard = new Clipboard("GeRuDok clipboard");
+	
+	public MyMainFrame() {
+		/*String[] languages = {"en_US", "sr_RS"};
+		String seld_langs = (String) JOptionPane.showInputDialog(null, "Select a language: ", "Input", 
+				JOptionPane.QUESTION_MESSAGE, null, languages, languages[0]
+		);*/
+		
+		Locale.setDefault(new Locale("en", "US"));
+		resourceBundle = ResourceBundle.getBundle("MessageResources.MessageResources", Locale.getDefault());
+		System.out.println(Locale.getDefault().toString());
+	}
+	
+	private void init_() {
+		actionManager = new MyActionManager();
+		
+		this.init_GUI();
+		
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			SwingUtilities.updateComponentTreeUI(this);
+		} catch(Exception e) { 
+			e.printStackTrace();
+		}
+	}
+	
+	private void init_GUI() {
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		this.setSize(900, 600);
+		this.setLocationRelativeTo(null);
+		setTitle(resourceBundle.getString("appTitle"));
+		//this.setTitle(" GeRuDok (Tim-5.8) ");
+		Image img = kit.getImage("src/images/Stack.png");
+		this.setIconImage(img);
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		
+		this.menu = new MyMenu();
+		this.setJMenuBar(this.menu);
+		
+		this.toolbar = new MyToolbar();
+		this.getContentPane().add(this.toolbar, BorderLayout.NORTH);
+		
+		MyWorkspace workspace = this.init_WorkspaceTree();
+		
+		this.desktop = new MyWorkspaceView(workspace);
+		desktop.setBackground(Color.white);
+		
+		JScrollPane scroll = new JScrollPane(this.workspaceTree);
+		scroll.setMinimumSize(new Dimension(200, 150));
+		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scroll, this.desktop);
+		getContentPane().add(split, BorderLayout.CENTER);
+		split.setDividerLocation(250);
+		split.setOneTouchExpandable(true);
+		
+		this.statusBar = new MyStatusBar();
+		this.getContentPane().add(this.statusBar, BorderLayout.SOUTH);
+	}
+	
+	private MyWorkspace init_WorkspaceTree() {
+		this.workspace = new MyWorkspace();
+		this.workspaceTree = new MyWorkspaceTree(this.workspace);
+		
+		return this.workspace;
+	}
+
+	public static MyMainFrame getInstance() {
+		if (instance == null) {
+			instance = new MyMainFrame();
+			instance.init_();
+		}
+		return instance;
+	}
+	
+	public int gen_idx(ArrayList<Integer> free_indexes, ArrayList<MyProject> projects) {
+		if(free_indexes.size() == 1){
+			int min_idx_val = free_indexes.get(0);
+			free_indexes.remove(0);
+			return min_idx_val;
+		}
+		else if(free_indexes.size() >= 2){
+			int min_idx = free_indexes.indexOf(
+				Collections.min(free_indexes)
+			);
+			int min_idx_val = free_indexes.get(min_idx);
+			free_indexes.remove(min_idx);
+			return min_idx_val;
+		}
+		else return projects.size() + 1;
+	}
+
+	public MyWorkspace getWorkspace() {
+		return workspace;
+	}
+
+	public void setWorkspace(MyWorkspace workspace) {
+		this.workspace = workspace;
+	}
+
+	public void setWorkspaceTree(MyWorkspaceTree workspaceTree) {
+		this.workspaceTree = workspaceTree;
+	}
+
+	public MyActionManager getActionManager() {
+		return actionManager;
+	}
+
+	public MyWorkspaceTree getWorkspaceTree() {
+		return workspaceTree;
+	}
+
+	public MyWorkspaceView getDesktop() {
+		return desktop;
+	}
+
+	public MyStatusBar getStatusBar() {
+		return statusBar;
+	}
+
+	public void setStatusBar(MyStatusBar statusBar) {
+		this.statusBar = statusBar;
+	}
+	
+	public Clipboard getClipboard() {
+		return clipboard;
+	}
+
+	@Override
+	public void lostOwnership(Clipboard clipboard, Transferable contents) {
+		System.out.println("lostOwnership");
+	}
+	
+	public ResourceBundle getResourceBundle() {
+		return resourceBundle;
+	}
+	
+	public void changeLanguage() {
+		resourceBundle = ResourceBundle.getBundle("MessageResources.MessageResources", Locale.getDefault());
+	    setTitle(resourceBundle.getString("appTitle"));
+		menu.initComponents();
+		toolbar.initComponents();
+		statusBar.initComponents();
+	}
+}

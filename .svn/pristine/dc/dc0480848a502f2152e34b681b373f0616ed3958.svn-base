@@ -1,0 +1,75 @@
+package state;
+
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+import app_main.MyMainFrame;
+import model.MyElement;
+import model.MySlot;
+import model.element.MySlotElement;
+import view.MySlotView;
+import view.MySlotView.Handle;
+
+public class MySelectState extends MyState {
+	private MySlotView med;
+	
+	private int elementInMotion = -1;
+	private Handle handleInMotion = null;
+	
+	public MySelectState(MySlotView med) {
+		this.med = med;
+	}
+	
+	public void mousePressed(MouseEvent e) {
+		if(!e.isControlDown()) {
+			med.getSlot().getSelectionModel().removeAllFromSelectionList();
+		}
+		
+		Point position = e.getPoint();
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			handleInMotion = med.getDeviceAndHandleForPoint(position);
+			if(handleInMotion == null) {
+				elementInMotion = med.getSlot().getModel().getDeviceAtPosition(position);
+				
+				if(elementInMotion != -1) {
+					MyElement elem = med.getSlot().getElement(elementInMotion);
+					
+					MyMainFrame mfinst = MyMainFrame.getInstance();
+					DefaultMutableTreeNode ws = (DefaultMutableTreeNode) mfinst.getWorkspaceTree().getModel().getRoot();
+					
+					SwingUtilities.updateComponentTreeUI(mfinst.getWorkspaceTree());
+					
+					DefaultMutableTreeNode[] path = {
+						ws, elem.getParent_slot().getParent_page().getParent_doc().getParent_proj(),
+						elem.getParent_slot().getParent_page().getParent_doc(), 
+						elem.getParent_slot().getParent_page(), 
+						elem.getParent_slot(), 
+						elem
+					};
+					
+					TreePath tp = new TreePath(path);
+					mfinst.getWorkspaceTree().expandPath(tp);
+					mfinst.getWorkspaceTree().setSelectionPath(tp);
+				}
+				
+				if(elementInMotion != -1) {
+					MySlotElement element = med.getSlot().getModel().getElementAt(elementInMotion);
+					
+					if (med.getSlot().getSelectionModel().isElementSelected(element)) {
+						med.getSlot().getSelectionModel().removeFromSelectionList(element);
+					} else {
+						med.getSlot().getSelectionModel().addToSelectionList(element);
+					}
+				} 
+			}
+		}
+	}
+	
+	public void mouseMoved(MouseEvent e) {
+		MyMainFrame.getInstance().getStatusBar().setPosition(e.getPoint().toString());
+	}	
+}

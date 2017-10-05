@@ -1,0 +1,78 @@
+package model;
+
+import java.util.ArrayList;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app_main.MyMainFrame;
+
+public class MyWorkspace extends DefaultMutableTreeNode {
+	private static final long serialVersionUID = 1L;
+	
+	private ArrayList<MyProject> projects;
+	private ArrayList<Integer> free_indexes;
+	
+	//Naslediti DefaultMutableTreeNode i u njoj staviti protected observable i get i set.
+	private MyObservable observable;
+	
+	public MyWorkspace() {
+		super();
+		this.projects = new ArrayList<MyProject>();
+		this.free_indexes = new ArrayList<Integer>();
+		this.observable = new MyObservable();
+	}
+	
+	@Override public String toString() { return "Workspace"; }
+	
+	public void addProject(MyProject project) {
+		project.setID(MyMainFrame.getInstance().gen_idx(free_indexes, projects));
+		project.setName(
+			"Project-"+Integer.toString(project.getID())
+		);
+		
+		this.projects.add(project);
+		this.add((DefaultMutableTreeNode)project);
+		project.set_open(true);
+		
+		ObservableInfo observableInfo = new ObservableInfo(project, 1);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+	}
+	
+	public void removeProject(MyProject project) {
+		for(int i = 0; i < project.getDocumentCount(); i++) {
+			project.removeDocument(project.getDocument(i));
+		}
+		
+		Integer tmp = Integer.valueOf(project.getID());
+		
+		this.projects.remove(project);
+		this.remove(project);
+		this.free_indexes.add(tmp);
+		
+		ObservableInfo observableInfo = new ObservableInfo(project, 2);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+	}
+	
+	public MyProject getProject(int index) {
+		return projects.get(index);
+	}	
+	
+	public int getProjectIndex(MyProject proj) {
+		return projects.indexOf(proj);
+	}
+	
+	public int getProjectsCount() {
+		return projects.size();
+	}
+
+	public MyObservable getObservable() {
+		return observable;
+	}
+
+	public void setObservable(MyObservable observable) {
+		this.observable = observable;
+	}
+}

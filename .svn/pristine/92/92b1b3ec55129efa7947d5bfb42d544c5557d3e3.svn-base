@@ -1,0 +1,21 @@
+package actions;
+
+import java.awt.event.ActionEvent;
+
+import app_main.MyMainFrame;
+
+public class ExitAction extends MyAbstractAction {
+	private static final long serialVersionUID = 1L;
+
+	public ExitAction() {
+		super();
+		putValue(NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnExit"));
+		putValue(SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnExit"));
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		System.exit(0);
+	}
+
+}

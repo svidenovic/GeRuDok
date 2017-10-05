@@ -1,0 +1,151 @@
+package model;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app_main.MyMainFrame;
+
+public class MySlot extends DefaultMutableTreeNode implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	private char type;
+	private String name;
+	private MyPage parent_page;
+	private ArrayList<MyElement> elements;
+	private ArrayList<Integer> free_indexes;
+	private MyObservable observable;
+	private MySlotModel model;
+	private int ID;
+	private MyGraphicSlotSelectionModel selectionModel;
+	
+	public  MySlot(String name, char type) {
+		super();
+		this.name = name;
+		this.type = type;
+		this.elements = new ArrayList<MyElement>();
+		this.free_indexes = new ArrayList<Integer>();
+		this.observable = new MyObservable();
+		this.model = new MySlotModel(this);
+	}
+	
+	public MyElement addElement(MyElement element) {
+		element.setParent_slot(this);
+		element.setID(MyMainFrame.getInstance().getActionManager().getNewGSlotAction().gen_idx(free_indexes, elements));
+		element.setName(
+			element.getType() + "-" + 
+			Integer.toString(element.getID())
+		);
+		
+		this.elements.add(element);
+		this.add((DefaultMutableTreeNode) element);
+		
+		this.parent_page.getParent_doc().getParent_proj().setChanged(true);
+		
+		ObservableInfo observableInfo = new ObservableInfo(element, 1);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+		
+		return element;
+	}
+	
+	public void removeElement(MyElement element) {
+		Integer tmp = Integer.valueOf(element.getID());
+		int idx = 0;
+		while(idx < element.getParent_slot().getElementsCount()){
+			if(element.getParent_slot().getElement(idx).getID()
+			== element.getID()) break; else idx++;
+		}
+		this.model.removeElement( 
+			this.model.getDeviceAt(idx), false
+		);
+		
+		this.elements.remove(element);
+		this.remove(element);
+		
+		this.free_indexes.add(tmp);
+		
+		this.parent_page.getParent_doc().getParent_proj().setChanged(true);
+		
+		ObservableInfo observableInfo = new ObservableInfo(element, 2);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+	}
+	
+	public void removeElements(ArrayList<MyElement> elements) {
+		this.elements.removeAll(elements);
+	}
+	
+	public MyElement getElement(int index) {
+		return this.elements.get(index);
+	}
+	
+	public int getElementIndex(MyElement element) {
+		return this.elements.indexOf(element);
+	}
+	
+	public int getElementsCount() {
+		return this.elements.size();
+	}
+	
+	@Override
+	public String toString() {
+		return this.name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public char getType() {
+		return type;
+	}
+
+	public void setType(char type) {
+		this.type = type;
+	}
+
+	public MyPage getParent_page() {
+		return parent_page;
+	}
+
+	public void setParent_page(MyPage parent_page) {
+		this.parent_page = parent_page;
+	}
+
+	public MySlotModel getModel() {
+		return model;
+	}
+
+	public void setModel(MySlotModel model) {
+		this.model = model;
+	}
+
+	public MyObservable getObservable() {
+		return observable;
+	}
+
+	public void setObservable(MyObservable observable) {
+		this.observable = observable;
+	}
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+	
+	public MyGraphicSlotSelectionModel getSelectionModel() {
+		if(selectionModel == null)
+			selectionModel = new MyGraphicSlotSelectionModel();
+		return selectionModel;
+	}
+}

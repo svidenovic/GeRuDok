@@ -1,0 +1,74 @@
+
+appTitle = GeRuDok (Tim-5.8)
+
+btnAbout = O nama...
+
+btnBold = Podebljanje
+
+btnCascade = Kaskadno poravnanje
+
+btnCircle = Krug
+
+btnCopy = Kopiraj
+
+btnCut = Iseci
+
+btnDelete = Izbrisi
+
+btnExit = Izlaz
+
+btnHorizontal = Horizontalno poravnanje
+
+btnItalic = Iskoseno
+
+btnNewDocument = Novi dokument
+
+btnNewGSlot = Novi graficki slot
+
+btnNewPage = Nova stranica
+
+btnNewProject = Novi projekat
+
+btnNewTSlot = Novi tekstualni slot
+
+btnOpenP = Otvori projekat
+
+btnPaste = Nalepi
+
+btnRectangle = Kvadrat
+
+btnRedo = Vratiti ponisteno
+
+btnSelect = Selektuj
+
+btnUnderline = Podvuci
+
+btnUndo = Ponisti
+
+btnVertical = Vertikalno poravnanje
+
+menuEnglish = Engleski
+
+menuFile = Fajl
+
+menuHelp = Pomoc
+
+menuLanguage = Jezik
+
+menuOpen = Otvori
+
+menuSave = Snimi
+
+menuSerbian = Srpski L
+
+menuWindow = Prozor
+
+sBDimension = Dimenzije
+
+sBEName = Ime elementa
+
+sBEType = Tip elementa
+
+sBPosition = Pozicija
+
+sBState = Stanje

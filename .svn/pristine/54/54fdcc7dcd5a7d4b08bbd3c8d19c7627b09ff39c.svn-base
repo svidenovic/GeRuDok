@@ -1,0 +1,74 @@
+
+appTitle = GeRuDok (Tim-5.8)
+
+btnAbout = About
+
+btnBold = Bold
+
+btnCascade = Cascade window
+
+btnCircle = Circle
+
+btnCopy = Copy
+
+btnCut = Cut
+
+btnDelete = Delete
+
+btnExit = Exit
+
+btnHorizontal = Horizontal window
+
+btnItalic = Italic
+
+btnNewDocument = New document
+
+btnNewGSlot = New graphic slot
+
+btnNewPage = New page
+
+btnNewProject = New project
+
+btnNewTSlot = New text slot
+
+btnOpenP = Open project
+
+btnPaste = Paste
+
+btnRectangle = Rectangle
+
+btnRedo = Redo
+
+btnSelect = Select
+
+btnUnderline = Underline
+
+btnUndo = Undo
+
+btnVertical = Vertical window
+
+menuEnglish = English
+
+menuFile = File
+
+menuHelp = Help
+
+menuLanguage = Language
+
+menuOpen = Open
+
+menuSave = Save
+
+menuSerbian = Serbian L
+
+menuWindow = Window
+
+sBDimension = Dimension
+
+sBEName = Element name
+
+sBEType = Element type
+
+sBPosition = Position
+
+sBState = State

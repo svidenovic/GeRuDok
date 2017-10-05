@@ -1,0 +1,106 @@
+package gui;
+
+import java.awt.Desktop.Action;
+import java.awt.event.KeyEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+
+import app_main.MyMainFrame;
+
+public class MyMenu extends JMenuBar {
+	private static final long serialVersionUID = 1L;
+
+	JMenu file;
+	JMenu window;
+	JMenu language;
+	JMenu help;
+	
+	public MyMenu() {
+		super();
+		
+		file = new JMenu(MyMainFrame.getInstance().getResourceBundle().getString("menuFile"));
+		file.setMnemonic(KeyEvent.VK_F);
+		
+		file.add(MyMainFrame.getInstance().getActionManager().getNewProjectAction());
+		file.add(MyMainFrame.getInstance().getActionManager().getNewDocumentAction());
+		file.add(MyMainFrame.getInstance().getActionManager().getNewPageAction());
+		file.add(MyMainFrame.getInstance().getActionManager().getNewTSlotAction());
+		file.add(MyMainFrame.getInstance().getActionManager().getNewGSlotAction());
+		file.addSeparator();
+		file.add(MyMainFrame.getInstance().getActionManager().getOpenProjectFileAction());
+		file.add(MyMainFrame.getInstance().getActionManager().getSaveProjectFileAction());
+		file.addSeparator();
+		file.add(MyMainFrame.getInstance().getActionManager().getExitAction());
+		
+		window = new JMenu(MyMainFrame.getInstance().getResourceBundle().getString("menuWindow"));
+		window.setMnemonic(KeyEvent.VK_W);
+		
+		window.add(MyMainFrame.getInstance().getActionManager().getCascadeWindowAction());
+		window.add(MyMainFrame.getInstance().getActionManager().getHorizontalWindowAction());
+		window.add(MyMainFrame.getInstance().getActionManager().getVerticalWindowAction());
+		
+		language = new JMenu(MyMainFrame.getInstance().getResourceBundle().getString("menuLanguage"));
+		language.setMnemonic(KeyEvent.VK_L);
+		
+		language.add(MyMainFrame.getInstance().getActionManager().getEnglishAction());
+		language.add(MyMainFrame.getInstance().getActionManager().getSerbianLAction());
+		
+		help = new JMenu(MyMainFrame.getInstance().getResourceBundle().getString("menuHelp"));
+		help.setMnemonic(KeyEvent.VK_H);
+		
+		help.add(MyMainFrame.getInstance().getActionManager().getCallAboutDialog());
+		
+		add(file);
+		add(window);
+		add(language);
+		add(help);
+	}
+	
+	public void initComponents() {
+		file.setText(MyMainFrame.getInstance().getResourceBundle().getString("menuFile"));
+		
+		MyMainFrame.getInstance().getActionManager().getNewProjectAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnNewProject"));
+		MyMainFrame.getInstance().getActionManager().getNewDocumentAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnNewDocument"));
+		MyMainFrame.getInstance().getActionManager().getNewPageAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnNewPage"));
+		MyMainFrame.getInstance().getActionManager().getNewTSlotAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnNewTSlot"));
+		MyMainFrame.getInstance().getActionManager().getNewGSlotAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnNewGSlot"));
+		MyMainFrame.getInstance().getActionManager().getOpenProjectFileAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("menuOpen"));
+		MyMainFrame.getInstance().getActionManager().getSaveProjectFileAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("menuSave"));
+		MyMainFrame.getInstance().getActionManager().getExitAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnExit"));
+		
+		MyMainFrame.getInstance().getActionManager().getNewProjectAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnNewProject"));
+		MyMainFrame.getInstance().getActionManager().getNewDocumentAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnNewDocument"));
+		MyMainFrame.getInstance().getActionManager().getNewPageAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnNewPage"));
+		MyMainFrame.getInstance().getActionManager().getNewTSlotAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnNewTSlot"));
+		MyMainFrame.getInstance().getActionManager().getNewGSlotAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnNewGSlot"));
+		MyMainFrame.getInstance().getActionManager().getOpenProjectFileAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("menuOpen"));
+		MyMainFrame.getInstance().getActionManager().getSaveProjectFileAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("menuSave"));
+		MyMainFrame.getInstance().getActionManager().getExitAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnExit"));
+		
+		window.setText(MyMainFrame.getInstance().getResourceBundle().getString("menuWindow"));
+		
+		MyMainFrame.getInstance().getActionManager().getCascadeWindowAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnCascade"));
+		MyMainFrame.getInstance().getActionManager().getHorizontalWindowAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnHorizontal"));
+		MyMainFrame.getInstance().getActionManager().getVerticalWindowAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnVertical"));
+		
+		MyMainFrame.getInstance().getActionManager().getCascadeWindowAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnCascade"));
+		MyMainFrame.getInstance().getActionManager().getHorizontalWindowAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnHorizontal"));
+		MyMainFrame.getInstance().getActionManager().getVerticalWindowAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnVertical"));
+		
+		language.setText(MyMainFrame.getInstance().getResourceBundle().getString("menuLanguage"));
+		
+		MyMainFrame.getInstance().getActionManager().getEnglishAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("menuEnglish"));
+		MyMainFrame.getInstance().getActionManager().getSerbianLAction().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("menuSerbian"));
+		
+		MyMainFrame.getInstance().getActionManager().getEnglishAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("menuEnglish"));
+		MyMainFrame.getInstance().getActionManager().getSerbianLAction().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("menuSerbian"));
+		
+		help.setText(MyMainFrame.getInstance().getResourceBundle().getString("menuHelp"));
+		
+		MyMainFrame.getInstance().getActionManager().getCallAboutDialog().putValue(AbstractAction.NAME, MyMainFrame.getInstance().getResourceBundle().getString("btnAbout"));
+		
+		MyMainFrame.getInstance().getActionManager().getCallAboutDialog().putValue(AbstractAction.SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("btnAbout"));
+	}
+}

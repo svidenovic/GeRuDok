@@ -1,0 +1,112 @@
+package model;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app_main.MyMainFrame;
+
+public class MyDocument extends DefaultMutableTreeNode implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	private String name;
+	private ArrayList<MyPage> pages;
+	private ArrayList<Integer> free_indexes;
+	private MyObservable observable;
+	private MyProject parent_proj;
+	private int ID;
+	
+	public MyDocument(String name) {
+		super(name);
+		this.name = name;
+		this.pages = new ArrayList<MyPage>();
+		this.free_indexes = new ArrayList<Integer>();
+		this.observable = new MyObservable();
+	}
+	
+	public void addPage(MyPage page) {
+		page.setParent_doc(this);
+		page.setID(MyMainFrame.getInstance().getActionManager().getNewDocumentAction().gen_idx(free_indexes, pages));
+		page.setName(
+			"Page-"+Integer.toString(page.getID())
+		);
+		
+		this.pages.add(page);
+		this.add((DefaultMutableTreeNode) page);
+		
+		this.parent_proj.setChanged(true);
+		
+		ObservableInfo observableInfo = new ObservableInfo(page, 1);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+	}
+	
+	public void removePage(MyPage page) {
+		for(int i = 0; i < page.getSlotCount(); i++) {
+			page.removeSlot(page.getSlot(i));
+		}
+		
+		Integer tmp = Integer.valueOf(page.getID());
+		
+		this.pages.remove(page);
+		this.remove(page);
+		this.free_indexes.add(tmp);
+		
+		this.parent_proj.setChanged(true);
+		
+		ObservableInfo observableInfo = new ObservableInfo(page, 2);
+		
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+	}
+	
+	public MyPage getPage(int index) {
+		return this.pages.get(index);
+	}
+	
+	public int getPageIndex(MyPage page) {
+		return this.pages.indexOf(page);
+	}
+	
+	public int getPageCount() {
+		return this.pages.size();
+	}
+	
+	@Override
+	public String toString() {
+		return (this.name);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public MyObservable getObservable() {
+		return observable;
+	}
+
+	public void setObservable(MyObservable observable) {
+		this.observable = observable;
+	}
+
+	public MyProject getParent_proj() {
+		return parent_proj;
+	}
+
+	public void setParent_proj(MyProject parent_proj) {
+		this.parent_proj = parent_proj;
+	}
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+}

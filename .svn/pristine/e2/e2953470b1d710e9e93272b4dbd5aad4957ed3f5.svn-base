@@ -1,0 +1,66 @@
+package view;
+
+import java.beans.PropertyVetoException;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.JDesktopPane;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+import app_main.MyMainFrame;
+import model.MyProject;
+import model.MyWorkspace;
+import model.ObservableInfo;
+
+public class MyWorkspaceView extends JDesktopPane implements Observer {
+	private static final long serialVersionUID = 1L;
+	
+	private MyWorkspace workspace;
+	
+	public MyWorkspaceView(MyWorkspace workspace) {
+		super();
+		this.workspace = workspace;
+		this.workspace.getObservable().addObserver(this);
+	}
+
+	@Override
+	public void update(Observable o, Object object) {
+		ObservableInfo observableInfo = (ObservableInfo) object;
+		MyProject project = (MyProject) observableInfo.getObject();
+		MyProjectView view = new MyProjectView(project);
+		
+		if(observableInfo.getID() == 1) {
+			this.add(view);
+			
+			try {
+				view.setSelected(true);
+			} catch (PropertyVetoException e) {
+				e.printStackTrace();
+			}
+		} else if(observableInfo.getID() == 2) {
+			for(int i = 0; i < this.getComponentCount(); i++) {
+				MyProjectView pView = (MyProjectView) this.getComponent(i);
+				if(pView.getProject().equals(project)) {
+					this.remove(pView);
+					this.setVisible(false);
+					this.setVisible(true);
+				}
+			}
+		}
+		
+		MyMainFrame mfinst = MyMainFrame.getInstance();
+		DefaultMutableTreeNode[] path = {
+				(MyWorkspace) mfinst.getWorkspaceTree().getModel().getRoot(), 
+				project
+		};
+		
+		TreePath tp = new TreePath(path);
+		mfinst.getWorkspaceTree().expandPath(tp);
+		mfinst.getWorkspaceTree().setSelectionPath(tp);
+		
+		SwingUtilities.updateComponentTreeUI(mfinst.getWorkspaceTree());
+		mfinst.getWorkspaceTree().click_helper(null);
+	}
+}

@@ -1,0 +1,85 @@
+package actions;
+
+import java.awt.event.ActionEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
+import javax.swing.JFileChooser;
+
+import app_main.MyMainFrame;
+import model.MyDocument;
+import model.MyElement;
+import model.MyPage;
+import model.MyProject;
+import model.MySlot;
+import model.MyWorkspace;
+import model.ObservableInfo;
+import view.MyDocumentView;
+import view.MyProjectView;
+
+public class OpenProjectFileAction extends MyAbstractAction {
+	private static final long serialVersionUID = 1L;
+
+	public OpenProjectFileAction() {
+		super();
+		putValue(SMALL_ICON, loadIcon("src/images/size16/Open.png"));
+		putValue(LARGE_ICON_KEY, loadIcon("src/images/size22/Open.png"));
+		putValue(NAME, MyMainFrame.getInstance().getResourceBundle().getString("menuOpen"));
+		putValue(SHORT_DESCRIPTION, MyMainFrame.getInstance().getResourceBundle().getString("menuOpen"));
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileFilter(new MyFileFilter());
+		
+		if(jfc.showOpenDialog(MyMainFrame.getInstance()) == JFileChooser.APPROVE_OPTION) {
+			try {
+				ObjectInputStream os = new ObjectInputStream(new FileInputStream(jfc.getSelectedFile()));
+				  
+				MyProject project = null;
+				try {
+					project = (MyProject) os.readObject();
+				} catch (ClassNotFoundException ef) {
+					ef.printStackTrace();
+				}
+				
+				MyWorkspace workspace = (MyWorkspace) MyMainFrame.getInstance().getWorkspaceTree().getModel().getRoot();
+			    workspace.addProject(project);
+			    
+			    ObservableInfo observableInfo = null;
+			    for(int i = 0; i < project.getDocumentCount(); i++) {
+			    	MyDocument document = project.getDocument(i);
+			    	observableInfo = new ObservableInfo(document, 1);
+			    	project.getObservable().setChanged();
+			    	project.getObservable().notifyObservers(observableInfo);
+			    	for(int j = 0; j < document.getPageCount(); j++) {
+			    		MyPage page = document.getPage(j);
+			    		observableInfo = new ObservableInfo(page, 1);
+			    		document.getObservable().setChanged();
+				    	document.getObservable().notifyObservers(observableInfo);
+				    	for(int k = 0; k < page.getSlotCount(); k++) {
+				    		MySlot slot = page.getSlot(k);
+				    		observableInfo = new ObservableInfo(slot, 1);
+				    		page.getObservable().setChanged();
+					    	page.getObservable().notifyObservers(observableInfo);
+					    	/*for(int l = 0; l < slot.getElementsCount(); l++) {
+					    		MyElement element = slot.getElement(l);
+					    		observableInfo = new ObservableInfo(element, 1);
+					    		slot.getObservable().setChanged();
+						    	slot.getObservable().notifyObservers(observableInfo);
+					    	}*/
+				    	}
+			    	}
+			    }
+				
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			} 
+		}
+	}
+}

@@ -1,0 +1,231 @@
+package model;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app_main.MyMainFrame;
+
+public class MyDocument extends DefaultMutableTreeNode implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	private String name;
+	private ArrayList<MyPage> pages;
+	private ArrayList<Integer> free_indexes;
+	private MyObservable observable;
+	private MyProject parent_proj;
+	private int ID;
+	private MyDocShare original_doc;
+	private ArrayList<MyDocShare> doc_shares;
+	
+//	private void readObject(java.io.ObjectInputStream in)
+//	    throws IOException, ClassNotFoundException {
+//	    in.defaultReadObject();
+//	    this.original_doc = null;
+//	    this.init_docShares();
+//	}
+	
+	public MyDocument(String name) {
+		super(name);
+		this.name = name;
+		this.pages = new ArrayList<MyPage>();
+		this.free_indexes = new ArrayList<Integer>();
+		this.observable = new MyObservable();
+		this.original_doc = null;
+		this.doc_shares = new ArrayList<MyDocShare>();
+	}
+	public MyDocument( MyDocument _doc ){
+		super( new String(_doc.name) );
+		this.name = new String(_doc.name);
+		this.pages = new ArrayList<MyPage>();
+		this.observable = new MyObservable();
+		this.original_doc = new MyDocShare(_doc.original_doc);
+		this.doc_shares = new ArrayList<MyDocShare>(_doc.doc_shares);
+		this.free_indexes = new ArrayList<Integer>(_doc.free_indexes);
+	}
+	
+	public void addPage(MyPage page) {
+		page.setParent_doc(this);
+		page.setID(MyMainFrame.getInstance().getActionManager().getNewDocumentAction().gen_idx(free_indexes, pages));
+		if( page.getName().equals(" ") )
+			page.setName("Page " + Integer.toString(page.getID()) );
+		this.pages.add(page);
+		this.add((DefaultMutableTreeNode) page);
+		
+		ObservableInfo observableInfo = new ObservableInfo(page, 1);
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+		
+//		JOptionPane.showMessageDialog(null, this.original_doc.toString());
+		if(this.original_doc == null){// case this doc is original:
+			for(int i=0; i<this.doc_shares.size(); i++){
+				MyProject proj = this.doc_shares.get(i).getProj();
+				MyDocument doc = this.doc_shares.get(i).getDoc();
+				
+				MyDocument _doc = proj.getDocument(
+					(new MyDocShare( this.parent_proj, doc )).toString()
+				);
+				MyPage _page = new MyPage( page );
+				_page.setParent_doc(_doc );
+				_doc.pages.add(_page );
+				_doc.add((DefaultMutableTreeNode)_page);
+				
+				observableInfo = new ObservableInfo(_page,1 );
+				_doc.observable.setChanged();
+				_doc.observable.notifyObservers(observableInfo);
+			}
+		}
+	}
+	
+	public void removePage(MyPage page) {
+		for(int i = 0; i < page.getSlotCount(); i++) {
+			page.removeSlot(page.getSlot(i));
+		}
+		this.pages.remove(page);
+		this.remove(page);
+		this.free_indexes.add( Integer.valueOf(page.getID()) );
+		
+		ObservableInfo observableInfo = new ObservableInfo(page, 2);
+		this.observable.setChanged();
+		this.observable.notifyObservers(observableInfo);
+		
+		if(this.original_doc == null){// case this doc is original:
+			for(int i=0; i<this.doc_shares.size(); i++){
+				MyProject proj = this.doc_shares.get(i).getProj();
+				MyDocument doc = this.doc_shares.get(i).getDoc();
+				
+				MyDocument _doc = proj.getDocument(
+					(new MyDocShare( this.parent_proj, doc )).toString()
+				);
+				MyPage _page = _doc.getPage(page.toString());
+				for(int s=0; s<_page.getSlotCount(); s++){
+					_page.removeSlot(_page.getSlot(s));
+				}
+				_doc.pages.remove(_page);
+				_doc.remove(_page);
+				_doc.free_indexes.add( Integer.valueOf(_page.getID()) );
+				
+				observableInfo = new ObservableInfo(_page, 2);
+				_doc.observable.setChanged();
+				_doc.observable.notifyObservers(observableInfo);
+			}
+		}
+		
+	}
+	
+	public void copy_this_content_to( MyDocument that_guy ){
+		// that guy has to be empty !
+		MyPage _page = null;
+		MySlot _slot = null;
+		@SuppressWarnings("unused")
+		MyElement _elem = null;
+		for(int p=0; p<this.getPageCount(); p++){
+			_page = new MyPage( this.getPage(p) );
+			that_guy.addPage(_page);
+			for(int s=0; s<this.getPage(p).getSlotCount(); s++){
+				_slot = new MySlot( this.getPage(p).getSlot(s) );
+				_page.addSlot(_slot);
+//				if(_slot.getType() == 'G'){
+//					for(int e=0; e<this.getPage(p).getSlot(s).getElementsCount(); e++){
+//						_elem = new MyElement( this.getPage(p).getSlot(s).getElement(e) );
+//						_slot.addElement(_elem);
+//					}
+//				}else if(_slot.getType() == 'T'){
+					// update _slot view
+//				}
+			}
+		}
+	}
+	
+	public void setOriginal( MyDocShare orig ){
+		this.original_doc = orig;
+	}
+	public MyDocShare getOriginal(){
+		return this.original_doc;
+	}
+	public void init_docShares(){
+		this.doc_shares = new ArrayList<MyDocShare>();
+	}
+	public boolean add_docShare( MyDocShare dsh ){
+		for( MyDocShare it : this.doc_shares ){
+			if( it.eq2(dsh) ) return false;
+		}
+		this.doc_shares.add( dsh );
+		return true;
+	}
+	public void copy_doc_shares_from( MyDocument doc ){
+		this.doc_shares = new ArrayList<MyDocShare>(doc.doc_shares);
+	}
+	public boolean remoce_docShare( MyDocShare dsh ){
+		for( MyDocShare it : this.doc_shares ){
+			if( it.eq2(dsh) ){
+				this.doc_shares.remove( dsh );
+				return true;
+			}
+		}
+		return false;
+	}
+	public void remove_all_docShares(){
+		this.doc_shares.clear();
+	}
+	public ArrayList<MyDocShare> get_doc_shares(){
+		return this.doc_shares;
+	}
+	
+	public MyPage getPage(int index) {
+		return this.pages.get(index);
+	}
+	public MyPage getPage(String name){
+		for(MyPage pageit : this.pages){
+			if(pageit.toString().equals(name))
+				return pageit;
+		}
+		return null;
+	}
+	
+	public int getPageIndex(MyPage page) {
+		return this.pages.indexOf(page);
+	}
+	
+	public int getPageCount() {
+		return this.pages.size();
+	}
+	
+	@Override
+	public String toString() {
+		return (this.name);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public MyObservable getObservable() {
+		return observable;
+	}
+
+	public void setObservable(MyObservable observable) {
+		this.observable = observable;
+	}
+
+	public MyProject getParent_proj() {
+		return parent_proj;
+	}
+
+	public void setParent_proj(MyProject parent_proj) {
+		this.parent_proj = parent_proj;
+	}
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+}

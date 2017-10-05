@@ -1,0 +1,379 @@
+package view;
+
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.datatransfer.Transferable;
+import java.awt.geom.Dimension2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+import app_main.MyMainFrame;
+import commands.MyAddDeviceCommand;
+import commands.MyCommandManager;
+import commands.MyPasteCommand;
+import controller.MySlotViewListeners;
+import model.MyElement;
+import model.MySlot;
+import model.MySlotElementsSelection;
+import model.MyWorkspace;
+import model.ObservableInfo;
+import model.element.MyCircleElement;
+import model.element.MyRectangleElement;
+import model.element.MySlotElement;
+import net.miginfocom.swing.MigLayout;
+import state.MyStateManager;
+import view.painter.MyCirclePainter;
+import view.painter.MyRectanglePainter;
+
+public class MySlotView extends JPanel implements Observer {
+	private static final long serialVersionUID = 1L;
+	
+	private MySlot slot;
+	private JTextPane t;
+	
+	private TSlotDialog tsd;
+	private GSlotDialog gsd;
+	
+	private JPanel slot_panel;
+	private JTextField txt;
+	
+	public static final int CIRCLE = 1;
+	public static final int RECTANGLE = 2;
+	
+	public enum Handle {
+		North, South, East, West, SouthEast, SouthWest, NorthEast, NorthWest
+	}
+	static final int handleSize = 7;
+	
+	private MyStateManager stateManager = new MyStateManager(this);
+	private MyCommandManager commandManager = new MyCommandManager();
+	
+	private void MySlotView_(MySlot slot) {
+		this.slot = slot;
+		this.slot.getObservable().addObserver(this);
+		this.tsd = new TSlotDialog(this);
+		this.gsd = new GSlotDialog(this);
+		
+		// outpan:
+		this.setLayout(new MigLayout("wrap 1"));
+		this.setBackground(Color.GRAY);
+		this.addMouseListener(new MySlotViewListeners(this));
+		
+		// txtfld:
+		this.txt = new JTextField(this.slot.toString());
+		this.txt.setEditable(false);
+		this.txt.setHorizontalAlignment(JTextField.CENTER);
+		this.txt.addMouseListener(new MySlotViewListeners(this));
+		
+		// inpan:
+		if(this.slot.getType() == 'T') {
+			this.slot_panel = new JPanel(new BorderLayout());
+			this.t = new JTextPane();
+			this.t.setEnabled(false);
+			this.t.addMouseListener(new MySlotViewListeners(this));
+			this.t.setForeground(Color.black);
+			this.slot_panel.add(t);
+			//this.slot_panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			this.slot_panel.setBackground(Color.WHITE);
+			this.slot_panel.addMouseListener(new MySlotViewListeners(this));
+		} else if(this.slot.getType() == 'G') {
+			this.slot_panel = new MyGslotCanvas(this);
+			this.slot_panel.setLayout(new MigLayout("wrap 1"));
+			this.slot_panel.setBackground(Color.WHITE);
+			//this.slot_panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			this.slot_panel.addMouseListener(new MySlotViewListeners(this));
+			MyMainFrame.getInstance().getActionManager().getNewRectangleAction().setView(this);
+			MyMainFrame.getInstance().getActionManager().getNewCircleAction().setView(this);
+			MyMainFrame.getInstance().getActionManager().getSelectAction().setView(this);
+			MyMainFrame.getInstance().getActionManager().getUndoAction().setView(this);
+			MyMainFrame.getInstance().getActionManager().getRedoAction().setView(this);
+			MyMainFrame.getInstance().getActionManager().getCopyAction().setView(this);
+			MyMainFrame.getInstance().getActionManager().getCutAction().setView(this);
+			MyMainFrame.getInstance().getActionManager().getPasteAction().setView(this);
+			this.slot_panel.validate();
+		}
+		
+		this.make_deselected();
+		this.add(this.slot_panel, "dock north");
+		this.add(this.txt, "dock south");
+		
+		this.setVisible(false);
+		this.setVisible(true);
+	}
+	public MySlotView( MySlot slot ) {
+		super(); this.MySlotView_( slot );
+	}
+	public MySlotView( MySlotView view ){
+		super(); this.MySlotView_( new MySlot( view.slot ) );
+	}
+	
+	public void make_selected() {
+		this.txt.setForeground(Color.decode("#376489"));
+		this.txt.setBackground(Color.decode("#DEDEDE"));
+//		this.slot_panel.setBackground(Color.decode("#F3F3F3"));
+		this.slot_panel.setBackground(Color.decode("#DEDEDE"));
+	}
+	public void make_deselected() {
+		this.txt.setForeground(Color.decode("#000000"));
+		this.txt.setBackground(Color.decode("#DEDEDE"));
+		this.slot_panel.setBackground(Color.decode("#FFFFFF"));
+	}
+	
+	public void startCircleState() { 
+		slot.getSelectionModel().removeAllFromSelectionList();
+		stateManager.setCircleState();
+	}
+	
+    public void startRectangleState() {
+    	slot.getSelectionModel().removeAllFromSelectionList();
+    	stateManager.setRectangleState(); 
+    }
+    
+    public void startSelectState() {
+    	stateManager.setSelectState();
+	}
+    
+	public MyStateManager getStateManager() { 
+		return stateManager; 
+	}
+	
+	public MyCommandManager getCommandManager() {
+		return commandManager;
+	}
+	
+	public void setCommandManager(MyCommandManager commandManager) {
+		this.commandManager = commandManager;
+	}
+
+	public TSlotDialog getTsd() {
+		return tsd;
+	}
+
+	public void setTsd(TSlotDialog tsd) {
+		this.tsd = tsd;
+	}
+
+	public GSlotDialog getGsd() {
+		return gsd;
+	}
+
+	public void setGsd(GSlotDialog gsd) {
+		this.gsd = gsd;
+	}
+
+	public MySlot getSlot() {
+		return slot;
+	}
+
+	public void setSlot(MySlot slot) {
+		this.slot = slot;
+	}
+
+	public JTextPane getT() {
+		return t;
+	}
+
+	public void setT(JTextPane t) {
+		this.t = t;
+	}
+
+	public JPanel getSlot_panel() {
+		return slot_panel;
+	}
+
+	public void setSlot_panel(JPanel slot_panel) {
+		this.slot_panel = slot_panel;
+	}
+
+	public JTextField getTxt() {
+		return txt;
+	}
+
+	public void setTxt(JTextField txt) {
+		this.txt = txt;
+	}
+
+	@Override
+	public void update(Observable o, Object object) {
+		ObservableInfo observableInfo = (ObservableInfo) object;
+		MyElement element = (MyElement) observableInfo.getObject();
+		
+		MyMainFrame mfinst = MyMainFrame.getInstance();
+		MyWorkspace mws = (MyWorkspace) mfinst.getWorkspaceTree().getModel().getRoot();
+		
+		SwingUtilities.updateComponentTreeUI(mfinst.getWorkspaceTree());
+		
+		DefaultMutableTreeNode[] path = {
+				(DefaultMutableTreeNode) mws,
+				(DefaultMutableTreeNode) element.getParent_slot().getParent_page().getParent_doc().getParent_proj(),
+				(DefaultMutableTreeNode) element.getParent_slot().getParent_page().getParent_doc(),
+				(DefaultMutableTreeNode) element.getParent_slot().getParent_page(),
+				(DefaultMutableTreeNode) element.getParent_slot(),
+				(DefaultMutableTreeNode) element
+		};
+		
+		TreePath tp = new TreePath(path);
+		mfinst.getWorkspaceTree().expandPath(tp);
+		mfinst.getWorkspaceTree().setSelectionPath(tp);
+		
+		SwingUtilities.updateComponentTreeUI(mfinst.getWorkspaceTree());
+	}
+	
+	public Handle getDeviceAndHandleForPoint(Point2D point){
+		MySlotElement element;
+		
+		Iterator<MySlotElement> it = slot.getSelectionModel().getSelectionListIterator();
+		while(it.hasNext()){
+			element = it.next();
+			return getHandleForPoint(element, point);
+		}
+		return null;
+	}
+	
+	private Handle getHandleForPoint(MySlotElement element, Point2D point){
+		for(Handle h: Handle.values()){
+			if(isPointInHandle(element, point, h)){
+				return h;
+			}
+		}
+		return null;
+	}
+	
+	private boolean isPointInHandle(MySlotElement element, Point2D point, Handle handle){
+		if (element instanceof MySlotElement) {
+			MySlotElement device = (MySlotElement) element;
+			Point2D handleCenter = getHandlePoint(device.getPosition(), device.getSize(), handle);
+			return ( (Math.abs(point.getX()-handleCenter.getX())<=(double)handleSize/2) && 
+					(Math.abs(point.getY()-handleCenter.getY())<=(double)handleSize/2) );
+		} else 
+			return false;
+	}
+	
+	private Point2D getHandlePoint(Point2D topLeft, Dimension2D size, Handle handlePosition) {
+		double x = 0;
+		double y = 0;
+		
+		if(handlePosition == Handle.NorthWest || handlePosition == Handle.North || handlePosition == Handle.NorthEast) {
+			y = topLeft.getY();
+		}
+		
+		if(handlePosition == Handle.East || handlePosition == Handle.West){
+			y = topLeft.getY() + size.getHeight()/2;
+		}
+		
+		if(handlePosition == Handle.SouthWest || handlePosition == Handle.South || handlePosition == Handle.SouthEast) {
+			y = topLeft.getY() + size.getHeight();
+		}
+
+		if(handlePosition == Handle.NorthWest || handlePosition == Handle.West || handlePosition == Handle.SouthWest) {
+			x = topLeft.getX();
+		}
+		
+		if(handlePosition == Handle.North || handlePosition == Handle.South){
+			x = topLeft.getX() + size.getWidth()/2;
+		}
+		
+		if(handlePosition == Handle.NorthEast || handlePosition == Handle.East || handlePosition == Handle.SouthEast) {
+			x = topLeft.getX() + size.getWidth();
+		}
+		
+		return new Point2D.Double(x, y);
+	}
+	
+	/*public void setMouseCursor(Point2D point) {
+		
+		Handle handle = getDeviceAndHandleForPoint(point);
+
+		if(handle != null){
+			Cursor cursor = null;
+			
+			switch(handle) {
+				case North: cursor = Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR);break;
+				case South: cursor = Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR);break;
+				case East: cursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);break;
+				case West: cursor = Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR);break;
+				case SouthEast: cursor = Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR);break;
+				case NorthWest: cursor = Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR);break;
+				case SouthWest: cursor = Cursor.getPredefinedCursor(Cursor.SW_RESIZE_CURSOR);break;
+				case NorthEast: cursor = Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR);break;
+			}
+			//this.gsd.getCanvas().setCursor(cursor);
+			//slot_panel.setCursor(cursor);
+		} else
+			//this.gsd.setCursor(Cursor.getDefaultCursor());
+			slot_panel.setCursor(Cursor.getDefaultCursor());
+	}*/
+	
+	public void paintSelectionHandles(Graphics2D g2) {
+		Iterator<MySlotElement> it = slot.getSelectionModel().getSelectionListIterator();
+		
+		while(it.hasNext()){
+			MySlotElement element =  it.next();
+			if (element instanceof MySlotElement) {
+				MySlotElement device = (MySlotElement)element;
+				g2.setStroke(new BasicStroke((float)1, BasicStroke.CAP_SQUARE, 
+						BasicStroke.JOIN_BEVEL, 1f, new float[]{3f, 6f}, 0 ));
+				g2.setPaint(Color.BLACK);
+			
+				g2.drawRect((int)device.getPosition().getX()-20, (int)device.getPosition().getY()-20,
+						(int)device.getSize().getWidth(), (int)device.getSize().getHeight());
+			
+				for(Handle e: Handle.values()) {
+					paintSelectionHandle(g2, getHandlePoint(device.getPosition(), device.getSize(), e));
+				}
+			}
+		}
+	}
+	
+	private void paintSelectionHandle(Graphics2D g2, Point2D position){
+		double size = handleSize;
+		g2.fill(new Rectangle2D.Double(position.getX()-23, position.getY()-23, size, size));
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void paste() {
+		Transferable clipboardContent = MyMainFrame.getInstance().getClipboard().getContents(MyMainFrame.getInstance()); 
+		if ((clipboardContent != null) &&
+		 	(clipboardContent.isDataFlavorSupported (MySlotElementsSelection.elementFlavor))) {
+			try {
+				MySlotElement device = null;
+				ArrayList<MySlotElement> tempElements = (ArrayList<MySlotElement>) clipboardContent.getTransferData(MySlotElementsSelection.elementFlavor);					
+				for(int i = 0; i < tempElements.size(); i++) {
+		 			if(tempElements.get(i) instanceof MySlotElement) {
+		 				device = (MySlotElement) tempElements.get(i).clone();
+		 				Point2D newLocation = (Point2D) device.getPosition().clone();
+			 			newLocation.setLocation(device.getPosition().getX() + 50, device.getPosition().getY() + 50);
+			 			device.setPosition(newLocation);
+			 			
+			 			if (device instanceof MyCircleElement) {
+			 				device.setElementPainter(new MyCirclePainter(device));
+			 			} else if (device instanceof MyRectangleElement) {
+			 				device.setElementPainter(new MyRectanglePainter(device));
+			 			}
+			 			
+			 			this.commandManager.addCommand(new MyPasteCommand(device, this.slot.getModel()));
+			 			this.slot.getModel().addSlotElements(device, false);
+			 			
+			 			System.out.println(this.commandManager.getCommands().size());
+		 			}
+		 		}
+			} catch (Exception ex) {
+		 		ex.printStackTrace ();
+		 	}
+		}
+	}
+}
